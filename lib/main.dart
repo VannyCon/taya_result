@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Taya Result',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -151,136 +152,106 @@ class _MyHomePageState extends State<MyHomePage> {
                           return Center(
                               child: Text("Error: ${snapshot.error}"));
                         }
-                        // Assuming your Firestore documents have fields named 'date', 'field2', 'field3', 'field4'
-                        var data = snapshot.data!.docs[0].data()
-                            as Map<String, dynamic>;
-                        String date = data['Date'] ?? 'Unknown Date';
-                        String tenthirthyAm = data['10:30AM'] ?? '';
-                        String threePm = data['3PM'] ?? '';
-                        String SevenPm = data['7PM'] ?? '';
-                        return Table(
-                          defaultVerticalAlignment:
-                              TableCellVerticalAlignment.middle,
+                        // Assuming your Firestore documents have fields named 'Date', '10:30AM', '3PM', '7PM'
+                        var dataList = snapshot.data!.docs
+                            .map((doc) => doc.data() as Map<String, dynamic>)
+                            .toList();
+                        return Column(
                           children: [
-                            TableRow(
-                              decoration: BoxDecoration(
-                                color: colorScheme.primary,
-                              ),
-                              children: [
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
+                            Container(
+                              color: colorScheme.primary,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text(
                                       'Date',
                                       style: TextStyle(
                                         color: colorScheme.secondary,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
+                                    Text(''),
+                                    Text(
                                       '10:30AM',
                                       style: TextStyle(
                                         color: colorScheme.secondary,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      '3:00PM',
+                                    Text(
+                                      '3PM',
                                       style: TextStyle(
                                         color: colorScheme.secondary,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      '7:00PM',
+                                    Text(
+                                      '7PM',
                                       style: TextStyle(
                                         color: colorScheme.secondary,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                            TableRow(
-                              children: [
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      date,
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
+                            SizedBox(
+                                height:
+                                    10), // Adjust the spacing between header and data rows
+                            ...dataList
+                                .expand((data) => [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 8, 0, 8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Text(
+                                              data['Date'] ?? 'Unknown Date',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                            Text(
+                                              data['10:30AM'] ?? '',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                            Text(
+                                              data['3PM'] ?? '',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                            Text(
+                                              data['7PM'] ?? '',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      tenthirthyAm,
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Divider(
+                                            height: 1, color: Colors.grey),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      threePm,
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      SevenPm,
-                                      style: TextStyle(
-                                        color: colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                                      SizedBox(
+                                        height: 10,
+                                      ) // Divider after each row
+                                    ])
+                                .toList(),
                           ],
                         );
                       },
