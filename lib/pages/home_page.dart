@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
         : MyColorSchemes.lightModeScheme;
 
     return AnimatedTheme(
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       data: theme.copyWith(
         colorScheme: colorScheme,
       ),
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
+                const SizedBox(
                   height: 40,
                 ),
                 Row(
@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     IconButton(
                       onPressed: _toggleDarkMode,
                       icon: Container(
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: colorScheme.onSecondary,
                           borderRadius: BorderRadius.circular(
@@ -116,13 +116,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           10.0), // Set your desired border radius
                       borderSide: BorderSide.none, // Remove the border color
                     ),
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                         vertical: 15.0,
                         horizontal: 16.0), // Adjust padding as needed
                   ),
                   style: TextStyle(color: colorScheme.outline),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 ClipRRect(
@@ -134,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
                           return Center(
@@ -181,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                    Text(''),
+                                    const Text(''),
                                     Text(
                                       '10:30AM',
                                       style: TextStyle(
@@ -210,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                                 height:
                                     10), // Adjust the spacing between header and data rows
                             ...dataList
@@ -249,12 +250,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                           ],
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                      const Padding(
+                                        padding: EdgeInsets.all(8.0),
                                         child: Divider(
                                             height: 1, color: Colors.grey),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 10,
                                       ) // Divider after each row
                                     ])

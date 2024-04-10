@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:taya_result/firebase/firebase_service.dart';
+import 'package:taya_result/pages/home_page.dart';
 
 class UpdateFoundPage extends StatelessWidget {
   @override
@@ -10,35 +13,49 @@ class UpdateFoundPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.system_update,
                 size: 100,
                 color: Colors.blue,
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Update Found',
                 style: TextStyle(fontSize: 20),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Logic to continue with the update
-                  // For example:
-                  // Navigator.pop(context); // Remove this page from the stack
-                  // Then implement logic to proceed with the update
+              const SizedBox(height: 20),
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseService.updateLink(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  }
+                  var data =
+                      snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                  var updateLink = data['updateLink'];
+                  return ElevatedButton(
+                    onPressed: () {
+                      FirebaseService.openLink(updateLink);
+                    },
+                    child: const Text('Update'),
+                  );
                 },
-                child: Text('Continue'),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: () {
-                  // Logic to skip the update
-                  // For example:
-                  // Navigator.pop(context); // Remove this page from the stack
-                  // Then implement logic to skip the update
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyHomePage(
+                              title: 'TAYA RESULT',
+                            )), // navigate to MyHomePage
+                  );
                 },
-                child: Text('Skip'),
+                child: const Text('Skip'),
               ),
             ],
           ),

@@ -8,6 +8,7 @@ import 'package:taya_result/pages/ForceUpdate.dart';
 import 'package:taya_result/pages/home_page.dart';
 import 'package:taya_result/pages/404NotFound.dart';
 import 'package:taya_result/pages/UpdateFound.dart';
+import 'package:taya_result/pages/luncher.dart';
 import 'package:taya_result/pages/nointernet.dart';
 
 void main() async {
@@ -37,19 +38,6 @@ void loadAds() {
       },
     ),
   );
-}
-
-Future<DocumentSnapshot> appStatus() async {
-  try {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection('app_status')
-        .doc('status')
-        .get();
-    return snapshot;
-  } catch (e) {
-    // Handle errors, e.g., network issues, permission denied, etc.
-    throw Exception('Failed to fetch app status: $e');
-  }
 }
 
 void _showDeleteDialog(BuildContext context, String link) {
@@ -119,11 +107,12 @@ class MyApp extends StatelessWidget {
       home: Builder(
         builder: (context) {
           return FutureBuilder<DocumentSnapshot>(
-            future: appStatus(), // Call the appStatus function here
+            future:
+                FirebaseService.appStatus(), // Call the appStatus function here
             builder: (BuildContext context,
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(); // Show a loading indicator while waiting for data
+                return Luancher(); // Show a loading indicator while waiting for data
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
