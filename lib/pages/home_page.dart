@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:taya_result/firebase/firebase_service.dart';
 import 'package:taya_result/theme/theme.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -13,11 +14,43 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _isDarkMode = true;
+  String _searchText = '';
+  // ignore: unused_field
+  String _version = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _getAppVersion();
+  }
 
   void _toggleDarkMode() {
     setState(() {
       _isDarkMode = !_isDarkMode;
     });
+  }
+
+  // Future<void> _launchURL(String url) async {
+  //   if (await canLaunch(url)) {
+  //     await launch(url);
+  //   } else {
+  //     throw 'Could not launch $url';
+  //   }
+  // }
+
+  Future<void> _getAppVersion() async {
+    try {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _version = packageInfo.version;
+      });
+    } catch (e) {
+      print("Error fetching package info: $e");
+    }
   }
 
   @override
@@ -84,6 +117,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchText = value;
+                    });
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search...',
                     hintStyle: TextStyle(color: colorScheme.outline),
@@ -123,6 +161,25 @@ class _MyHomePageState extends State<MyHomePage> {
                         var dataList = snapshot.data!.docs
                             .map((doc) => doc.data() as Map<String, dynamic>)
                             .toList();
+                        dataList = dataList.where((note) {
+                          String datelower = note['Date'].toLowerCase();
+                          String dateupper = note['Date'].toUpperCase();
+                          String agalower = note['10:30AM'].toLowerCase();
+                          String agaupper = note['10:30AM'].toUpperCase();
+                          String udtolower = note['3PM'].toLowerCase();
+                          String udtoupper = note['3PM'].toUpperCase();
+                          String gabelower = note['7PM'].toLowerCase();
+                          String gabeupper = note['7PM'].toUpperCase();
+                          return datelower
+                                  .contains(_searchText.toLowerCase()) ||
+                              dateupper.contains(_searchText.toUpperCase()) ||
+                              agalower.contains(_searchText.toLowerCase()) ||
+                              agaupper.contains(_searchText.toUpperCase()) ||
+                              udtolower.contains(_searchText.toLowerCase()) ||
+                              udtoupper.contains(_searchText.toUpperCase()) ||
+                              gabelower.contains(_searchText.toLowerCase()) ||
+                              gabeupper.contains(_searchText.toUpperCase());
+                        }).toList();
                         return Column(
                           children: [
                             Container(
