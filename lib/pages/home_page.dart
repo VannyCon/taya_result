@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:taya_result/firebase/firebase_service.dart';
 import 'package:taya_result/theme/theme.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -21,11 +20,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    await _getAppVersion();
   }
 
   void _toggleDarkMode() {
@@ -41,17 +35,6 @@ class _MyHomePageState extends State<MyHomePage> {
   //     throw 'Could not launch $url';
   //   }
   // }
-
-  Future<void> _getAppVersion() async {
-    try {
-      PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      setState(() {
-        _version = packageInfo.version;
-      });
-    } catch (e) {
-      print("Error fetching package info: $e");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
