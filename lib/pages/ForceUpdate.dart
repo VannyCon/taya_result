@@ -18,17 +18,23 @@ class ForceUpdate extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.system_update,
-                size: 100,
-                color: Colors.blue,
+              Center(
+                widthFactor: double.infinity,
+                child: Image.asset(
+                  'images/forceupdate-min.png',
+                  height: 400,
+                  width: 400,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
-                'This is Force Update',
-                style: TextStyle(fontSize: 20),
+                'Force Update',
+                style: TextStyle(
+                    fontSize: 35,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF413867)),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 5),
               StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseService.updateLink(),
                 builder: (context, snapshot) {
@@ -41,11 +47,57 @@ class ForceUpdate extends StatelessWidget {
                   var data =
                       snapshot.data!.data() as Map<String, dynamic>? ?? {};
                   var updateLink = data['updateLink'];
-                  return ElevatedButton(
-                    onPressed: () {
-                      FirebaseService.openLink(updateLink);
-                    },
-                    child: const Text('Update'),
+                  var forceUpdatemessage = data['forceUpMessage'];
+                  return Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 150,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF413867),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            onPressed: () {
+                              FirebaseService.openLink(updateLink);
+                            },
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Update',
+                                  style: TextStyle(
+                                    color: Color(0xFFEAF2FD),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Container(
+                          width: 350,
+                          child: Center(
+                            child: Text(
+                              forceUpdatemessage,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 222, 36, 36),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   );
                 },
               ),

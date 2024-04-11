@@ -29,10 +29,13 @@ class _LuancherState extends State<Luancher> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.logo_dev_sharp,
-                size: 100,
-                color: Colors.blue,
+              Center(
+                widthFactor: double.infinity,
+                child: Image.asset(
+                  'images/luancher-min.png',
+                  height: 400,
+                  width: 400,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(

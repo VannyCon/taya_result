@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:taya_result/firebase/firebase_service.dart';
 import 'package:taya_result/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -13,7 +14,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _isDarkMode = true;
+  bool _isDarkMode = false;
   String _searchText = '';
   // ignore: unused_field
   String _version = '';
@@ -95,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _showCreditsDialog(context);
+                            _showCreditsDialog(context, colorScheme);
                           },
                           icon: Container(
                             padding: const EdgeInsets.all(8.0),
@@ -229,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 const Text(''),
                 Text(
-                  '10:30AM',
+                  '1ST',
                   style: TextStyle(
                     color: colorScheme.secondary,
                     fontSize: 17,
@@ -237,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 Text(
-                  '3PM',
+                  '2ND',
                   style: TextStyle(
                     color: colorScheme.secondary,
                     fontSize: 17,
@@ -245,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 Text(
-                  '7PM',
+                  '3RD',
                   style: TextStyle(
                     color: colorScheme.secondary,
                     fontSize: 17,
@@ -268,26 +269,30 @@ class _MyHomePageState extends State<MyHomePage> {
                         Text(
                           data['Date'] ?? 'Unknown Date',
                           style: TextStyle(
-                            color: colorScheme.primary,
-                          ),
+                              color: colorScheme.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400),
                         ),
                         Text(
                           data['10:30AM'] ?? '---------',
                           style: TextStyle(
-                            color: colorScheme.primary,
-                          ),
+                              color: colorScheme.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
                         ),
                         Text(
                           data['3PM'] ?? '---------',
                           style: TextStyle(
-                            color: colorScheme.primary,
-                          ),
+                              color: colorScheme.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
                         ),
                         Text(
                           data['7PM'] ?? '---------',
                           style: TextStyle(
-                            color: colorScheme.primary,
-                          ),
+                              color: colorScheme.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -306,17 +311,234 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-void _showCreditsDialog(BuildContext context) {
+void _showCreditsDialog(BuildContext context, ColorScheme colorScheme) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Credits'),
+        backgroundColor: colorScheme.secondary,
+        title: Text(
+          'ABOUT',
+          style: TextStyle(
+              fontWeight: FontWeight.bold, color: colorScheme.primary),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Your Name'),
-            Text('Your Link'),
+            Row(
+              children: [
+                Text(
+                  'Developer: ',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary),
+                ),
+                Text(
+                  'Mr.VannyCon',
+                  style: TextStyle(color: colorScheme.primary),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'Email: ',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    launch('mailto:chelcontrevida4@gmail.com');
+                  },
+                  child: Text(
+                    'chelcontrevida4@gmail.com',
+                    style: TextStyle(
+                        color: colorScheme.primary,
+                        decoration: TextDecoration.underline),
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              'Social Accounts: ',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: colorScheme.primary),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(4, 0, 0, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/fb.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          launch('https://facebook.com/auhok.gege');
+                        },
+                        child: Text(
+                          'facebook.com/auhok.gege',
+                          style: TextStyle(
+                              color: colorScheme.primary,
+                              decoration: TextDecoration.underline),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/instagram.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          launch('https://instagram.com/alaka.nurse');
+                        },
+                        child: Text(
+                          'instagram.com/alaka.nurse',
+                          style: TextStyle(
+                              color: colorScheme.primary,
+                              decoration: TextDecoration.underline),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/github.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          launch('https://github.com/VannyCon');
+                        },
+                        child: Text(
+                          'github.com/VannyCon',
+                          style: TextStyle(
+                              color: colorScheme.primary,
+                              decoration: TextDecoration.underline),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'Made Up',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: colorScheme.primary),
+            ),
+            Row(
+              children: [
+                Image.asset(
+                  'images/icons/dart.png',
+                  height: 15,
+                  width: 15,
+                ),
+                Image.asset(
+                  'images/icons/flutter.png',
+                  height: 15,
+                  width: 15,
+                ),
+                Image.asset(
+                  'images/icons/firebase.png',
+                  height: 15,
+                  width: 15,
+                ),
+              ],
+            ),
+            Text(
+              'Special Thanks',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: colorScheme.primary),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(4, 0, 0, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/chatgpt.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      Text(
+                        'ChatGPT',
+                        style: TextStyle(color: colorScheme.primary),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/canva.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      Text(
+                        '@vectorjuice (Graphic Design)',
+                        style: TextStyle(color: colorScheme.primary),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'images/icons/heart.png',
+                        height: 15,
+                        width: 15,
+                      ),
+                      Text(
+                        'To All People specially You.',
+                        style: TextStyle(color: colorScheme.primary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'NOTE',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: colorScheme.primary),
+            ),
+            Container(
+              width: double.infinity,
+              child: Center(
+                child: Column(
+                  children: [
+                    const Text(
+                      'This app is not for sale.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 222, 36, 36),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'If someone tries to sell it, please contact me via my social media or email. This software was developed to help people who are having difficulty choosing or tracking results on STL Taya. Sorry if you see open app advertising; I made these to help me maintain this app. I hope you\'re using this properly; please don\'t abuse it. I\'ve just been learning Flutter for a couple of weeks now, so if there are any issues, please tell me so that we can help each other.',
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
           ],
         ),
         actions: [
@@ -324,7 +546,13 @@ void _showCreditsDialog(BuildContext context) {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('Close'),
+            child: Text(
+              'Close',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary),
+            ),
           ),
         ],
       );
