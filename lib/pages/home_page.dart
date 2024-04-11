@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:taya_result/firebase/firebase_service.dart';
 import 'package:taya_result/theme/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -20,21 +21,29 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _loadDarkModeStatus();
   }
 
   void _toggleDarkMode() {
     setState(() {
       _isDarkMode = !_isDarkMode;
+      _saveDarkModeStatus(
+          _isDarkMode); // Save the dark mode status when toggled
     });
   }
 
-  // Future<void> _launchURL(String url) async {
-  //   if (await canLaunch(url)) {
-  //     await launch(url);
-  //   } else {
-  //     throw 'Could not launch $url';
-  //   }
-  // }
+  Future<void> _loadDarkModeStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // If there is no stored value, use true as default (dark mode)
+      _isDarkMode = prefs.getBool('darkMode') ?? true;
+    });
+  }
+
+  Future<void> _saveDarkModeStatus(bool isDarkMode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('darkMode', isDarkMode);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       child: Scaffold(
         backgroundColor: colorScheme.background,
-        body: Center(
+        body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(
@@ -82,20 +91,41 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ],
                     ),
-                    IconButton(
-                      onPressed: _toggleDarkMode,
-                      icon: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSecondary,
-                          borderRadius: BorderRadius.circular(
-                              10.0), // Adjust the border radius as needed
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            _showCreditsDialog(context);
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSecondary,
+                              borderRadius: BorderRadius.circular(
+                                  10.0), // Adjust the border radius as needed
+                            ),
+                            child: Icon(
+                              Icons.info,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
-                        child: Icon(
-                          _isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                          color: colorScheme.onPrimary,
+                        IconButton(
+                          onPressed: _toggleDarkMode,
+                          icon: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSecondary,
+                              borderRadius: BorderRadius.circular(
+                                  10.0), // Adjust the border radius as needed
+                            ),
+                            child: Icon(
+                              _isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -112,15 +142,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     filled: true,
                     fillColor: colorScheme.surface,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                          10.0), // Set your desired border radius
-                      borderSide: BorderSide.none, // Remove the border color
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15.0,
-                        horizontal: 16.0), // Adjust padding as needed
+                      vertical: 15.0,
+                      horizontal: 16.0,
+                    ),
                   ),
                   style: TextStyle(color: colorScheme.outline),
+                  keyboardType: TextInputType.number, // Display numeric keypad
                 ),
                 const SizedBox(
                   height: 20,
@@ -141,127 +172,30 @@ class _MyHomePageState extends State<MyHomePage> {
                           return Center(
                               child: Text("Error: ${snapshot.error}"));
                         }
+
+                        // Assuming your Firestore documents have fields named 'Date', '10:30AM', '3PM', '7PM'
                         // Assuming your Firestore documents have fields named 'Date', '10:30AM', '3PM', '7PM'
                         var dataList = snapshot.data!.docs
                             .map((doc) => doc.data() as Map<String, dynamic>)
                             .toList();
+                        // Convert search text to upper case
+                        String searchText = _searchText.toUpperCase();
+                        // Remove hyphens from search text
+                        searchText = searchText.replaceAll('-', '');
+                        // Filter the dataList based on the preprocessed search text
                         dataList = dataList.where((note) {
-                          String datelower = note['Date'].toLowerCase();
-                          String dateupper = note['Date'].toUpperCase();
-                          String agalower = note['10:30AM'].toLowerCase();
-                          String agaupper = note['10:30AM'].toUpperCase();
-                          String udtolower = note['3PM'].toLowerCase();
-                          String udtoupper = note['3PM'].toUpperCase();
-                          String gabelower = note['7PM'].toLowerCase();
-                          String gabeupper = note['7PM'].toUpperCase();
-                          return datelower
-                                  .contains(_searchText.toLowerCase()) ||
-                              dateupper.contains(_searchText.toUpperCase()) ||
-                              agalower.contains(_searchText.toLowerCase()) ||
-                              agaupper.contains(_searchText.toUpperCase()) ||
-                              udtolower.contains(_searchText.toLowerCase()) ||
-                              udtoupper.contains(_searchText.toUpperCase()) ||
-                              gabelower.contains(_searchText.toLowerCase()) ||
-                              gabeupper.contains(_searchText.toUpperCase());
+                          final date = note['Date'] as String? ?? '';
+                          final time1 = note['10:30AM'] as String? ?? '';
+                          final time2 = note['3PM'] as String? ?? '';
+                          final time3 = note['7PM'] as String? ?? '';
+
+                          return date.contains(searchText) ||
+                              time1.replaceAll('-', '').contains(searchText) ||
+                              time2.replaceAll('-', '').contains(searchText) ||
+                              time3.replaceAll('-', '').contains(searchText);
                         }).toList();
-                        return Column(
-                          children: [
-                            Container(
-                              color: colorScheme.primary,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Text(
-                                      'Date',
-                                      style: TextStyle(
-                                        color: colorScheme.secondary,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const Text(''),
-                                    Text(
-                                      '10:30AM',
-                                      style: TextStyle(
-                                        color: colorScheme.secondary,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    Text(
-                                      '3PM',
-                                      style: TextStyle(
-                                        color: colorScheme.secondary,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    Text(
-                                      '7PM',
-                                      style: TextStyle(
-                                        color: colorScheme.secondary,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                                height:
-                                    10), // Adjust the spacing between header and data rows
-                            ...dataList
-                                .expand((data) => [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            0, 8, 0, 8),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Text(
-                                              data['Date'] ?? 'Unknown Date',
-                                              style: TextStyle(
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                            Text(
-                                              data['10:30AM'] ?? '',
-                                              style: TextStyle(
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                            Text(
-                                              data['3PM'] ?? '',
-                                              style: TextStyle(
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                            Text(
-                                              data['7PM'] ?? '',
-                                              style: TextStyle(
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Divider(
-                                            height: 1, color: Colors.grey),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ) // Divider after each row
-                                    ])
-                                .toList(),
-                          ],
-                        );
+
+                        return ReturnMainColumn(colorScheme, dataList);
                       },
                     ),
                   ),
@@ -273,4 +207,127 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  Column ReturnMainColumn(
+      ColorScheme colorScheme, List<Map<String, dynamic>> dataList) {
+    return Column(
+      children: [
+        Container(
+          color: colorScheme.primary,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  'Date',
+                  style: TextStyle(
+                    color: colorScheme.secondary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const Text(''),
+                Text(
+                  '10:30AM',
+                  style: TextStyle(
+                    color: colorScheme.secondary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '3PM',
+                  style: TextStyle(
+                    color: colorScheme.secondary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '7PM',
+                  style: TextStyle(
+                    color: colorScheme.secondary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(
+            height: 10), // Adjust the spacing between header and data rows
+        ...dataList
+            .expand((data) => [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          data['Date'] ?? 'Unknown Date',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          data['10:30AM'] ?? '---------',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          data['3PM'] ?? '---------',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          data['7PM'] ?? '---------',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Divider(height: 1, color: Colors.grey),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ) // Divider after each row
+                ])
+            .toList(),
+      ],
+    );
+  }
+}
+
+void _showCreditsDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Credits'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Your Name'),
+            Text('Your Link'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
 }

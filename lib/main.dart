@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -40,61 +41,7 @@ void loadAds() {
   );
 }
 
-void _showDeleteDialog(BuildContext context, String link) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(5),
-        child: AlertDialog(
-          title: const Text(
-            'Delete Data',
-            style: TextStyle(
-              fontSize: 15,
-            ),
-          ),
-          content: const SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(
-                  'Are you Sure you want to Delete this?',
-                  style: TextStyle(
-                    fontSize: 17,
-                  ),
-                )
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'CANCEL',
-                style: TextStyle(
-                  color: Color(0xFF413867),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                print(link);
-              },
-              child: const Text('YES'),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
-  bool hasInternet = true;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -106,60 +53,70 @@ class MyApp extends StatelessWidget {
       ),
       home: Builder(
         builder: (context) {
-          return FutureBuilder<DocumentSnapshot>(
-            future:
-                FirebaseService.appStatus(), // Call the appStatus function here
+          return FutureBuilder<ConnectivityResult>(
+            future: Connectivity().checkConnectivity(),
             builder: (BuildContext context,
-                AsyncSnapshot<DocumentSnapshot> snapshot) {
+                AsyncSnapshot<ConnectivityResult> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Luancher(); // Show a loading indicator while waiting for data
+                // Show a loading indicator while waiting for connectivity check
+                return Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
+                // Handle error if any
                 return Text('Error: ${snapshot.error}');
               } else {
-                // Handle the snapshot data as per your requirement
-                DocumentSnapshot? data = snapshot.data;
-                if (data != null && data.exists) {
-                  // Document exists, handle the data
-                  String hasConstruction = data['UnderConstruction'].toString();
-                  String forceUpdate = data['ForceUpdate'].toString();
-                  String hasUpdate = data['Update'].toString();
-                  String _link = data['updateLink'].toString();
-                  print('link: $_link');
+                // Connectivity check is completed
+                final hasInternet = snapshot.data != ConnectivityResult.none;
 
-                  // Update the values of hasUpdate and hasConstruction
-                  bool updateValue = hasUpdate.toLowerCase() == 'true';
-                  bool constructionValue =
-                      hasConstruction.toLowerCase() == 'true';
-                  bool forceUpdateValue = forceUpdate.toLowerCase() == 'true';
+                // Proceed with Firebase initialization
+                Firebase.initializeApp().then((_) {
+                  // Initialize other services, load data, etc.
+                  loadAds();
+                });
 
-                  // You can return widgets based on the data here if needed
-                  if (!hasInternet) {
-                    return NoInternetPage();
-                  } else {
-                    if (updateValue) {
-                      return UpdateFoundPage();
-                    } else if (constructionValue) {
-                      return NotFoundPage();
-                    } else if (forceUpdateValue) {
-                      return ForceUpdate();
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseService.appStatus(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Luancher();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
                     } else {
-                      return const MyHomePage(
-                        title: 'Taya Result',
-                      );
+                      DocumentSnapshot? data = snapshot.data;
+                      if (data != null && data.exists) {
+                        String hasConstruction =
+                            data['UnderConstruction'].toString();
+                        String forceUpdate = data['ForceUpdate'].toString();
+                        String hasUpdate = data['Update'].toString();
+                        String _link = data['updateLink'].toString();
+
+                        bool updateValue = hasUpdate.toLowerCase() == 'true';
+                        bool constructionValue =
+                            hasConstruction.toLowerCase() == 'true';
+                        bool forceUpdateValue =
+                            forceUpdate.toLowerCase() == 'true';
+
+                        if (!hasInternet) {
+                          return NoInternetPage();
+                        } else if (updateValue) {
+                          return UpdateFoundPage();
+                        } else if (constructionValue) {
+                          return NotFoundPage();
+                        } else if (forceUpdateValue) {
+                          return ForceUpdate();
+                        } else {
+                          return const MyHomePage(
+                            title: 'Taya Result',
+                          );
+                        }
+                      } else {
+                        return const MyHomePage(
+                          title: 'Taya Result',
+                        );
+                      }
                     }
-                  }
-                } else {
-                  // Document does not exist or is empty
-                  print('Document does not exist');
-                  // You can return appropriate widgets here if needed
-                  if (!hasInternet) {
-                    return NoInternetPage();
-                  } else {
-                    return const MyHomePage(
-                      title: 'Taya Result',
-                    );
-                  }
-                }
+                  },
+                );
               }
             },
           );
